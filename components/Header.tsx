@@ -33,7 +33,7 @@ export default function Navbar() {
           </div>
           {/* <User2Icon /> */}
           <Button variant={'default'} className="cursor-pointer">
-            Login
+            <Link href="/login"> Login</Link>
           </Button>
         </div>
       </nav>
