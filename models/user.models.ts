@@ -16,12 +16,16 @@ export interface IUser extends Document {
   };
 }
 
-const UserSchema: Schema<IUser> = new Schema(
+export interface UserMethods {
+  isValidPassword(password: string): Promise<boolean>;
+}
+
+const UserSchema = new Schema<IUser, Model<IUser>, UserMethods>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['Admin', 'User'], default: 'User', required: true },
+    role: { type: String, enum: ['Admin', 'User'], default: 'User' },
     address: {
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -31,6 +35,15 @@ const UserSchema: Schema<IUser> = new Schema(
     },
   },
   {
+    methods: {
+      isValidPassword(password) {
+        try {
+          return bcrypt.compare(password, this.password);
+        } catch (error) {
+          throw new Error('Password comparison failed');
+        }
+      },
+    },
     timestamps: true,
   }
 );
@@ -44,6 +57,6 @@ UserSchema.pre<IUser>('save', async function (next) {
   next();
 });
 
-const User: Model<IUser> = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+const User = mongoose.model('User', UserSchema);
 
 export default User;

@@ -1,9 +1,15 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { EyeIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 import { FaGoogle } from 'react-icons/fa';
 export default function Register() {
+  const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+
   return (
     <div className="flex min-h-[calc(100vh-86px)] flex-col items-center justify-center gap-4">
       <div className="flex h-[500px] w-[400px] flex-col items-center justify-center gap-2 rounded-2xl border p-10 shadow-2xl">
