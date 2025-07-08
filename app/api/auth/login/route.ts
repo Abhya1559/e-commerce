@@ -1,8 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user.models';
-import bcrypt from 'bcrypt';
-// import dotenv from 'dotenv';
 
 export async function POST(req: NextRequest) {
   await dbConnect();
