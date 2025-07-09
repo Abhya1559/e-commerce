@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user.models';
+import { signJWT } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -21,8 +22,8 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // const isMatch = await bcrypt.compare(password, user.password);
     const isMatch = await user.isValidPassword(password);
+    // const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return NextResponse.json({
@@ -30,7 +31,11 @@ export async function POST(req: NextRequest) {
         status: 401,
       });
     }
-    return NextResponse.json({
+
+    const token = signJWT({ id: user._id, email: user.email });
+    const isDev = process.env.NODE_ENV !== 'production';
+    console.log(token);
+    const res = NextResponse.json({
       message: 'Login successful ',
       status: 200,
       user: {
@@ -38,7 +43,18 @@ export async function POST(req: NextRequest) {
         name: user.name,
         role: user.role,
       },
+      token: token,
     });
+    // res.cookies.set('token', token, { httpOnly: true, secure: true, path: '/', maxAge: 3600 });
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      secure: !isDev,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 3600,
+    });
+    console.log(res);
+    return res;
   } catch (error) {
     console.error('server error', error);
     return NextResponse.json({

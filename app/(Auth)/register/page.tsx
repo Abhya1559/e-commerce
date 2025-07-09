@@ -53,11 +53,12 @@ export default function Register() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+      console.log(response);
       const data = await response.json();
       console.log(data);
       if (response.ok) {
         setSuccess(data.message);
-        router.push('/login');
+        router.push('/api/login');
       } else {
         setError(data.message || 'something went wrong');
       }

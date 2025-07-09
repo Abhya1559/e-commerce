@@ -1,43 +1,39 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { parseAuthCookie, verifyJwt } from './utils/jwt';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyJWT } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
-  // 1. Get the JWT from the Cookie
-  const token = parseAuthCookie(request.headers.get('cookie'));
+  // Marked as async
+  const token = request.cookies.get('token')?.value;
+  const pathname = request.nextUrl.pathname;
 
-  // 2. Define protected routes (example: all pages except the login page)
-  const isProtectedRoute = !request.nextUrl.pathname.startsWith('/login');
+  // Ensure all public paths, including the actual login path, are listed
+  const publicPaths = ['/', '/login', '/register', '/auth/login'];
+  const isPublic = publicPaths.includes(pathname);
 
-  if (isProtectedRoute) {
-    // 3. No token provided: Redirect to the login page
-    if (!token) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+  let user = null;
+  console.log('Token:', token);
 
-    // 4. Verify the JWT
-    const payload = verifyJwt(token);
-    if (!payload) {
-      // The token is invalid or expired, clear the invalid Cookie (optional)
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('authToken');
+  if (token) {
+    try {
+      user = await verifyJWT(token);
+    } catch (error) {
+      console.error('JWT verification failed:', error);
+      // Token is invalid or expired, treat as unauthenticated
+      const response = NextResponse.redirect(new URL('/auth/login', request.url));
+      response.cookies.delete('token'); // Clear the invalid token
       return response;
-    }
-
-    // 5. Verification passed: Attach user information to the request context (optional, needs to be used with route parameters)
-    // Or obtain it through the getToken function in subsequent processing
-  } else {
-    // 6. Login page: If authenticated, redirect to the dashboard
-    if (token && verifyJwt(token)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
-  // 7. Allow the request to continue
+  // If no valid user (i.e., not authenticated) AND the path is not public, redirect to login
+  if (!user && !isPublic) {
+    return NextResponse.redirect(new URL('/auth/login', request.url));
+  }
+
+  // If authenticated or a public path, proceed
   return NextResponse.next();
 }
 
-// 8. Configure the scope of the middleware (match all pages except API routes and static resources)
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/|favicon.ico).*)'],
 };
