@@ -13,8 +13,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
   const user = token
-    ? await fetch('/api/auth/verify', {
+    ? await fetch(new URL('/api/auth/verify', baseUrl), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -22,9 +24,9 @@ export async function middleware(request: NextRequest) {
     : null;
 
   if (user && isAuthPage) {
-    return NextResponse.redirect(new URL('/', request.url)); // Or any default logged-in page
+    return NextResponse.redirect(new URL('/', request.url));
   }
-
+  console.log(user);
   // If token is invalid and route is protected, redirect to login
   if (!user && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', request.url));

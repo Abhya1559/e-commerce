@@ -2,8 +2,12 @@ import { headerData } from '@/constants';
 import { Search, ShoppingCart, User2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { isLoggedIn } from '@/lib/session';
+import LogoutButton from './controls/LogoutButton';
 
-export default function Navbar() {
+export default async function Navbar() {
+  const loggedIn = await isLoggedIn();
+
   return (
     <div>
       <nav className="ms-auto flex w-[100%] items-center justify-between gap-10 border bg-white p-6 shadow-md">
@@ -32,9 +36,13 @@ export default function Navbar() {
             <ShoppingCart className="h-5 w-5 cursor-pointer" />
           </div>
           {/* <User2Icon /> */}
-          <Button variant={'default'} className="cursor-pointer">
-            <Link href="/login"> Login</Link>
-          </Button>
+          {loggedIn ? (
+            <LogoutButton />
+          ) : (
+            <Button variant={'default'} className="cursor-pointer">
+              <Link href="/login"> Login</Link>
+            </Button>
+          )}
         </div>
       </nav>
     </div>
