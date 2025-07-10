@@ -60,7 +60,7 @@ export default function Login() {
                 Email
               </label>
               <Input
-                type="text"
+                type="email"
                 name="email"
                 onChange={handleChange}
                 value={formData.email}
