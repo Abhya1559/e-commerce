@@ -40,7 +40,7 @@ export default async function Navbar() {
             <LogoutButton />
           ) : (
             <Button variant={'default'} className="cursor-pointer">
-              <Link href="/login"> Login</Link>
+              Login
             </Button>
           )}
         </div>
