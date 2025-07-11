@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/user.models';
 import { signJWT } from '@/lib/auth';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -52,7 +53,8 @@ export async function POST(req: NextRequest) {
       path: '/',
       maxAge: 3600,
     });
-    console.log(user);
+    // console.log(user);
+    revalidatePath('/');
     return response;
   } catch (error) {
     console.error('server error', error);

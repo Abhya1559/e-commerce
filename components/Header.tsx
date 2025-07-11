@@ -39,9 +39,11 @@ export default async function Navbar() {
           {loggedIn ? (
             <LogoutButton />
           ) : (
-            <Button variant={'default'} className="cursor-pointer">
-              Login
-            </Button>
+            <a href="/login">
+              <Button variant={'default'} className="cursor-pointer">
+                Login
+              </Button>
+            </a>
           )}
         </div>
       </nav>

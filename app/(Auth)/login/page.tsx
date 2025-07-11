@@ -27,12 +27,14 @@ export default function Login() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
+        cache: 'no-cache',
       });
       const data = await response.json();
       console.log(data);
       if (response.ok) {
         setSuccess(data.message);
         router.push('/');
+        router.refresh();
       } else {
         setError(data.message);
         // router.push('/login');
