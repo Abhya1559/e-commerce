@@ -14,12 +14,3 @@ export const verifyJWT = (token: string) => {
     return null;
   }
 };
-
-// export function verifyJWT(token: string) {
-//   try {
-//     const decoded = jwt.verify(token, JWT_SECRET);
-//     return decoded; // This can be user info
-//   } catch (err) {
-//     return null;
-//   }
-// }
