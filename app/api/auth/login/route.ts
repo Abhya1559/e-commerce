@@ -3,18 +3,40 @@ import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { signAccessToken, signRefreshToken } from '@/lib/jwt';
 import { serialize } from 'cookie';
+import { loginSchema } from '@/app/schemas/LoginFormValidation';
+import { addDays } from 'date-fns';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password } = body;
 
-    if (!email || !password) {
-      return NextResponse.json({ message: 'all fields are required' });
+    const result = loginSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json(
+        {
+          message: 'login validation failed',
+          errors: result.error.format(),
+        },
+        { status: 400 }
+      );
     }
+    const { email, password } = result.data;
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       return NextResponse.json({ message: 'User not exist please register' });
+    }
+    const existingRefreshToken = await prisma.refreshToken.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
+
+    if (existingRefreshToken) {
+      return NextResponse.json(
+        { message: 'You are already logged in' },
+        { status: 200 }
+      );
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
@@ -24,6 +46,14 @@ export async function POST(request: NextRequest) {
 
     const accessToken = signAccessToken({ userId: user.id });
     const refreshToken = signRefreshToken({ userId: user.id });
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: addDays(new Date(), 7),
+      },
+    });
 
     const response = NextResponse.json(
       { message: 'User logged in successfully', access_token: accessToken },
