@@ -14,25 +14,25 @@ export async function POST(request: NextRequest) {
     }
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return NextResponse.json({ message: 'User not  exist please register' });
+      return NextResponse.json({ message: 'User not exist please register' });
     }
 
-    const isvalidPassword = await bcrypt.compare(password, user.password);
-    if (!isvalidPassword) {
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
       return NextResponse.json({ message: 'password is incorrect' });
     }
 
-    const access_token = signAccessToken({ userId: user.id });
-    const refresh_token = signRefreshToken({ userId: user.id });
+    const accessToken = signAccessToken({ userId: user.id });
+    const refreshToken = signRefreshToken({ userId: user.id });
 
     const response = NextResponse.json(
-      { message: 'User logged in successfully', access_token },
+      { message: 'User logged in successfully', access_token: accessToken },
       { status: 200 }
     );
 
     response.headers.set(
-      'Set-cookie',
-      serialize('refreshToken', refresh_token, {
+      'Set-Cookie',
+      serialize('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
         path: '/',
