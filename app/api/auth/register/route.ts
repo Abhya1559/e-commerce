@@ -1,18 +1,27 @@
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
+import { UserSchema } from '@/app/schemas/userFormValidation';
+
 // const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password, role, address } = body;
 
-    if (!name || !email || !password || !role || !address) {
+    const result = UserSchema.safeParse(body);
+
+    if (!result.success) {
       return NextResponse.json(
-        { message: 'All fields are required' },
-        { status: 401 }
+        {
+          message: 'validation failed',
+          errors: result.error.format(),
+        },
+        { status: 400 }
       );
     }
+
+    const { name, email, password, role, address } = result.data;
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return NextResponse.json({ message: 'user already exist' });
@@ -22,11 +31,11 @@ export async function POST(request: NextRequest) {
 
     const newUser = await prisma.user.create({
       data: {
-        name: body.name,
-        email: body.email,
+        name,
+        email,
         password: hashPassword,
-        role: body.role,
-        address: body.address,
+        role,
+        address,
       },
     });
     return NextResponse.json(
