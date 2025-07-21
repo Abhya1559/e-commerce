@@ -8,10 +8,13 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserSchema } from '@/app/schemas/userFormValidation';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 type RegisterFormInputs = z.infer<typeof UserSchema>;
 
 export default function Register() {
+  const router = useRouter();
   const {
     register: formRegister,
     handleSubmit,
@@ -22,7 +25,7 @@ export default function Register() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const toggleVisibility = () => setShowPassword((prev) => !prev);
 
   const onSubmit = async (data: RegisterFormInputs) => {
@@ -36,10 +39,13 @@ export default function Register() {
       });
 
       const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.message || 'Registration failed');
+      if (!response.ok) {
+        toast.error(result.message || 'Registration failed');
+      }
 
       alert('User registered successfully');
+      router.push('/login');
+      toast.success('user logged in successfully');
       reset();
     } catch (error: any) {
       console.error(error.message);
@@ -67,7 +73,7 @@ export default function Register() {
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
+            className="flex flex-col  gap-4"
           >
             <div className="flex gap-5">
               <div className="flex flex-col w-full">
@@ -80,7 +86,7 @@ export default function Register() {
                 <input
                   id="name"
                   {...formRegister('name')}
-                  className="border px-3 py-2 rounded-md"
+                  className="border px-3 py-2 border-gray-300 rounded-md"
                 />
                 {errors.name && (
                   <span className="text-sm text-red-500">
@@ -100,7 +106,7 @@ export default function Register() {
                   id="email"
                   type="email"
                   {...formRegister('email')}
-                  className="border px-3 py-2 rounded-md"
+                  className="border px-3 py-2 border-gray-300 rounded-md"
                 />
                 {errors.email && (
                   <span className="text-sm text-red-500">
@@ -122,7 +128,7 @@ export default function Register() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   {...formRegister('password')}
-                  className="border px-3 py-2 rounded-md"
+                  className="border px-3 py-2 border-gray-300 rounded-md"
                 />
                 <span
                   onClick={toggleVisibility}
@@ -148,7 +154,7 @@ export default function Register() {
                   id="confirmPassword"
                   type="password"
                   {...formRegister('confirmPassword')}
-                  className="border px-3 py-2 rounded-md"
+                  className="border px-3 py-2 border-gray-300 rounded-md"
                 />
                 {errors.confirmPassword && (
                   <span className="text-sm text-red-500">
@@ -169,7 +175,7 @@ export default function Register() {
                 <input
                   id="role"
                   {...formRegister('role')}
-                  className="border px-3 py-2 rounded-md"
+                  className="border px-3 py-2 border-gray-300 rounded-md"
                 />
                 {errors.role && (
                   <span className="text-sm text-red-500">
@@ -188,7 +194,7 @@ export default function Register() {
                 <input
                   id="address"
                   {...formRegister('address')}
-                  className="border px-3 py-2 rounded-md"
+                  className="border border-gray-300 px-3 py-2 rounded-md"
                 />
                 {errors.address && (
                   <span className="text-sm text-red-500">
