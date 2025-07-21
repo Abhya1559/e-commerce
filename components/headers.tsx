@@ -3,7 +3,7 @@ import { Button } from './ui/button';
 
 export default function Header() {
   return (
-    <div className="top-0 fixed z-10 w-full bg-white shadow-md p-4">
+    <div className="top-0 fixed z-10 w-full bg-white shadow-md p-4 font-sans">
       <nav className="max-w-[1280px] mx-auto flex items-center justify-between">
         <div>
           <Link href="/">
