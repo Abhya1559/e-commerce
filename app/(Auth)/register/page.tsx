@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserSchema } from '@/app/schemas/userFormValidation';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 type RegisterFormInputs = z.infer<typeof UserSchema>;
 
@@ -40,13 +40,16 @@ export default function Register() {
 
       const result = await response.json();
       if (!response.ok) {
-        toast.error(result.message || 'Registration failed');
+        toast.error(
+          result.message || {
+            description: 'Try logging in instead.',
+          }
+        );
+        return;
       }
-
-      alert('User registered successfully');
-      router.push('/login');
       toast.success('user logged in successfully');
       reset();
+      router.push('/login');
     } catch (error: any) {
       console.error(error.message);
     }
