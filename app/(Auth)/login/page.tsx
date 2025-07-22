@@ -16,7 +16,40 @@ export default function Login() {
 
   const toggleVisibility = () => setShowPassword((prev) => !prev);
 
-  const handleChange = () => {};
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (!response.ok) {
+        setError({ email: data.message || 'Login failed' });
+        return;
+      }
+      if (data.token) {
+        localStorage.setItem('token', data.token); // Or cookies
+        alert('Login successful!');
+      } else {
+        setError({ email: 'No token received' });
+      }
+    } catch (err) {
+      setError({ email: 'Something went wrong' });
+    } finally {
+      setLoading(false);
+      setFormData({ email: '', password: '' });
+    }
+  };
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2 font-sans">
       {/* Form Section */}
@@ -31,7 +64,10 @@ export default function Login() {
           </div>
 
           {/* Login Form */}
-          <form className="flex flex-col gap-4 items-center justify-center w-full">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-4 items-center justify-center w-full"
+          >
             {/* Email Field */}
             <div className="flex flex-col w-full">
               <label htmlFor="email" className="mb-1 font-medium text-gray-700">
@@ -41,6 +77,8 @@ export default function Login() {
                 id="email"
                 name="email"
                 type="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full border border-gray-300 px-3 py-2 rounded-md  focus:ring-orange-500"
               />
             </div>
@@ -57,6 +95,8 @@ export default function Login() {
               <input
                 id="password"
                 name="password"
+                value={formData.password}
+                onChange={handleChange}
                 type={showPassword ? 'text' : 'password'}
                 className="w-full border px-3 py-2 border-gray-300  rounded-md  focus:ring-orange-500"
               />
