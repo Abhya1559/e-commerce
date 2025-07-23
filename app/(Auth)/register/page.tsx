@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import reg from '@/public/reg.jpg';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -15,6 +15,10 @@ type RegisterFormInputs = z.infer<typeof UserSchema>;
 
 export default function Register() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [submit, setSubmit] = useState(false);
+  const toggleVisibility = () => setShowPassword((prev) => !prev);
   const {
     register: formRegister,
     handleSubmit,
@@ -24,36 +28,61 @@ export default function Register() {
     resolver: zodResolver(UserSchema),
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const toggleVisibility = () => setShowPassword((prev) => !prev);
-
   const onSubmit = async (data: RegisterFormInputs) => {
-    // console.log(data);
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+    setSubmit(true);
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
 
-      const result = await response.json();
-      if (!response.ok) {
-        toast.error(
-          result.message || {
-            description: 'Try logging in instead.',
-          }
-        );
+        const result = await response.json();
+        if (!response.ok) {
+          toast.error(
+            result.message || {
+              description: 'Try logging in instead.',
+            }
+          );
+          reset();
+          return;
+        }
+        toast.success('user logged in successfully');
         reset();
-        return;
+        router.push('/login');
+      } catch (error: any) {
+        console.error(error.message);
       }
-      toast.success('user logged in successfully');
-      reset();
-      router.push('/login');
-    } catch (error: any) {
-      console.error(error.message);
-    }
+    }, 2000);
   };
+  useEffect(() => {
+    const time = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    return () => clearTimeout(time);
+  });
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-white">
+        <div className="animate-pulse text-4xl font-bold text-orange-500">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+  if (submit) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center">
+          <div className="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-lg text-orange-600 font-semibold animate-pulse">
+            Registering you in...
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2 font-sans">
       <div className="relative w-full h-full min-h-[400px] md:min-h-screen">

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema } from '@/app/schemas/LoginFormValidation';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
@@ -12,39 +12,80 @@ import Image from 'next/image';
 import login from '@/public/login.jpg';
 
 type loginFormInputs = z.infer<typeof loginSchema>;
+
 export default function Login() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleVisibility = () => setShowPassword((prev) => !prev);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
-    register: fromRegister,
+    register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = useForm<loginFormInputs>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: loginFormInputs) => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        toast.error(result.message || 'Invalid credentials');
-        return;
+    setIsSubmitting(true);
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          toast.error(result.message || 'Invalid credentials');
+          reset();
+          return;
+        }
+
+        toast.success('Logged in successfully');
+        reset();
+        router.push('/');
+      } catch (error) {
+        toast.error('Something went wrong');
+      } finally {
+        setIsSubmitting(false);
       }
-      toast.success('logged in successful');
-      router.push('/');
-    } catch (error) {
-      console.error(error);
-      toast.error('Something went wrong');
-    }
+    }, 2000);
   };
-  const [showPassword, setShowPassword] = useState(false);
-  const toggleVisibility = () => setShowPassword((prev) => !prev);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setInitialLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="animate-pulse text-4xl font-bold text-orange-500">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  if (isSubmitting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center">
+          <div className="w-20 h-20 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-lg text-orange-600 font-semibold animate-pulse">
+            Logging you in...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2 font-sans">
       {/* Form Section */}
@@ -70,11 +111,15 @@ export default function Login() {
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
                 {...register('email')}
-                className="w-full border border-gray-300 px-3 py-2 rounded-md  focus:ring-orange-500"
+                className="w-full border border-gray-300 px-3 py-2 rounded-md focus:ring-orange-500"
               />
+              {errors.email && (
+                <span className="text-red-500 text-sm">
+                  {errors.email.message}
+                </span>
+              )}
             </div>
 
             {/* Password Field */}
@@ -85,26 +130,29 @@ export default function Login() {
               >
                 Password
               </label>
-
               <input
                 id="password"
-                name="password"
                 type={showPassword ? 'text' : 'password'}
-                className="w-full border px-3 py-2 border-gray-300  rounded-md  focus:ring-orange-500"
+                {...register('password')}
+                className="w-full border px-3 py-2 border-gray-300 rounded-md focus:ring-orange-500"
               />
-
               <span
                 className="absolute right-3 top-[42px] cursor-pointer text-gray-500"
                 onClick={toggleVisibility}
               >
                 {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </span>
+              {errors.password && (
+                <span className="text-red-500 text-sm">
+                  {errors.password.message}
+                </span>
+              )}
             </div>
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md font-semibold"
+              className="mt-4 w-full cursor-pointer bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md font-semibold"
             >
               Login
             </button>
