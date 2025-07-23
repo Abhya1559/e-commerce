@@ -1,55 +1,50 @@
 'use client';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '@/app/schemas/LoginFormValidation';
+import { z } from 'zod';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import Image from 'next/image';
 import login from '@/public/login.jpg';
-import Link from 'next/link';
-import { useState } from 'react';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
 
+type loginFormInputs = z.infer<typeof loginSchema>;
 export default function Login() {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+  const router = useRouter();
+
+  const {
+    register: fromRegister,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<loginFormInputs>({
+    resolver: zodResolver(loginSchema),
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<{ email?: string; password?: string }>({});
-  const [showPassword, setShowPassword] = useState(false);
 
-  const toggleVisibility = () => setShowPassword((prev) => !prev);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
+  const onSubmit = async (data: loginFormInputs) => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
+        body: JSON.stringify(data),
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
       });
-      const data = await response.json();
-      console.log(data);
+      const result = await response.json();
       if (!response.ok) {
-        setError({ email: data.message || 'Login failed' });
+        toast.error(result.message || 'Invalid credentials');
         return;
       }
-      if (data.token) {
-        localStorage.setItem('token', data.token); // Or cookies
-        alert('Login successful!');
-      } else {
-        setError({ email: 'No token received' });
-      }
-    } catch (err) {
-      setError({ email: 'Something went wrong' });
-    } finally {
-      setLoading(false);
-      setFormData({ email: '', password: '' });
+      toast.success('logged in successful');
+      router.push('/');
+    } catch (error) {
+      console.error(error);
+      toast.error('Something went wrong');
     }
   };
+  const [showPassword, setShowPassword] = useState(false);
+  const toggleVisibility = () => setShowPassword((prev) => !prev);
   return (
     <div className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2 font-sans">
       {/* Form Section */}
@@ -65,7 +60,7 @@ export default function Login() {
 
           {/* Login Form */}
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4 items-center justify-center w-full"
           >
             {/* Email Field */}
@@ -77,8 +72,7 @@ export default function Login() {
                 id="email"
                 name="email"
                 type="email"
-                value={formData.email}
-                onChange={handleChange}
+                {...register('email')}
                 className="w-full border border-gray-300 px-3 py-2 rounded-md  focus:ring-orange-500"
               />
             </div>
@@ -95,8 +89,6 @@ export default function Login() {
               <input
                 id="password"
                 name="password"
-                value={formData.password}
-                onChange={handleChange}
                 type={showPassword ? 'text' : 'password'}
                 className="w-full border px-3 py-2 border-gray-300  rounded-md  focus:ring-orange-500"
               />

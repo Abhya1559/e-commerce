@@ -29,7 +29,7 @@ export default function Register() {
   const toggleVisibility = () => setShowPassword((prev) => !prev);
 
   const onSubmit = async (data: RegisterFormInputs) => {
-    console.log(data);
+    // console.log(data);
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
