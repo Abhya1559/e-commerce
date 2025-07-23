@@ -48,12 +48,17 @@ export default function Header() {
         </div>
         <div className="flex items-center justify-between font-semibold gap-4">
           {isLoggedIn ? (
-            <Button
-              className="bg-orange-500 hover:bg-orange-700 cursor-pointer"
-              onClick={handleLogout}
+            <Link
+              href="/logout"
+              className="hover:underline hover:text-orange-500"
             >
-              Logout
-            </Button>
+              <Button
+                className="bg-orange-500 hover:bg-orange-700 cursor-pointer"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </Link>
           ) : (
             <>
               <Link
