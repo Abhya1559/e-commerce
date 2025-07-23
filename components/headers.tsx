@@ -18,9 +18,21 @@ export default function Header() {
   }, []);
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout');
-    setIsLoggedIn(false);
-    router.push('/login');
+    try {
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        setIsLoggedIn(false);
+        router.push('/login');
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (

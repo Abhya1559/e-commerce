@@ -7,14 +7,27 @@ export default function Logout() {
   const router = useRouter();
 
   useEffect(() => {
-    // Delete the cookie manually (client-side only)
-    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    // Redirect after 1.5 seconds
-    const timer = setTimeout(() => {
-      router.push('/login');
-    }, 1500);
+    const logout = async () => {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include', // important for cookies
+        });
 
-    return () => clearTimeout(timer);
+        // Optional: clear any client-side tokens or flags
+        localStorage.removeItem('accessToken');
+        sessionStorage.clear();
+      } catch (err) {
+        console.error('Logout failed:', err);
+      }
+
+      // Wait 1.5 seconds before redirect
+      setTimeout(() => {
+        router.push('/login');
+      }, 1500);
+    };
+
+    logout();
   }, [router]);
 
   return (

@@ -49,6 +49,7 @@ export default function Login() {
 
         toast.success('Logged in successfully');
         reset();
+        window.location.href = '/';
         router.push('/');
       } catch (error) {
         toast.error('Something went wrong');

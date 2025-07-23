@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    const refreshToken = request.cookies.get('refresh-token')?.value;
+    const refreshToken = request.cookies.get('refreshToken')?.value;
 
     if (!refreshToken) {
       return NextResponse.json({ message: 'Not logged in' }, { status: 401 });
@@ -17,10 +17,13 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    response.headers.set(
-      'Set-Cookie',
-      `refreshToken=; Path=/; HttpOnly; Secure; Max-Age=0`
-    );
+    response.cookies.set('refreshToken', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      expires: new Date(0),
+    });
     return response;
   } catch (error) {
     console.log('server error', error);

@@ -60,15 +60,13 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
-    response.headers.set(
-      'Set-Cookie',
-      serialize('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-      })
-    );
+    response.cookies.set('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
     return response;
   } catch (error) {
     console.log('server error', error);
