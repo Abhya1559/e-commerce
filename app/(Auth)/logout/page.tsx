@@ -9,19 +9,22 @@ export default function Logout() {
   useEffect(() => {
     const logout = async () => {
       try {
-        await fetch('/api/auth/logout', {
+        const res = await fetch('/api/auth/logout', {
           method: 'POST',
-          credentials: 'include', // important for cookies
+          credentials: 'include',
         });
 
-        // Optional: clear any client-side tokens or flags
-        localStorage.removeItem('accessToken');
+        if (!res.ok) {
+          const data = await res.json();
+          console.error('Logout failed:', data.message);
+        }
+
+        localStorage.clear();
         sessionStorage.clear();
       } catch (err) {
-        console.error('Logout failed:', err);
+        console.error('Logout failed', err);
       }
 
-      // Wait 1.5 seconds before redirect
       setTimeout(() => {
         router.push('/login');
       }, 1500);

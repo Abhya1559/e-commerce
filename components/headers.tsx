@@ -11,10 +11,20 @@ export default function Header() {
   const router = useRouter();
 
   useEffect(() => {
-    const cookie = document.cookie;
-    const hasToken = cookie.includes('refreshToken');
-    console.log('Cookie:', cookie, 'Has token:', hasToken);
-    setIsLoggedIn(true);
+    const checkLogin = async () => {
+      try {
+        const res = await fetch('/api/auth/status', {
+          credentials: 'include',
+        });
+        const data = await res.json();
+        setIsLoggedIn(data.loggedIn);
+      } catch (err) {
+        console.error('Login status check failed', err);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkLogin();
   }, []);
 
   const handleLogout = async () => {
