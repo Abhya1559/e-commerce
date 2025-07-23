@@ -9,10 +9,6 @@ export default function Logout() {
   useEffect(() => {
     // Delete the cookie manually (client-side only)
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-
-    // Optionally clear any other client-side auth state
-    localStorage.removeItem('token='); // if used
-
     // Redirect after 1.5 seconds
     const timer = setTimeout(() => {
       router.push('/login');

@@ -55,7 +55,7 @@ export default function Login() {
       } finally {
         setIsSubmitting(false);
       }
-    }, 2000);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -149,7 +149,6 @@ export default function Login() {
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               className="mt-4 w-full cursor-pointer bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md font-semibold"

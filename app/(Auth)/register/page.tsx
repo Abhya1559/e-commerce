@@ -29,6 +29,7 @@ export default function Register() {
   });
 
   const onSubmit = async (data: RegisterFormInputs) => {
+    console.log(data);
     setSubmit(true);
     setTimeout(async () => {
       try {
@@ -241,13 +242,6 @@ export default function Register() {
               disabled={isSubmitting}
               className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md font-semibold"
             >
-              {/* {loading ? (
-                <div>
-                  <Loader />
-                </div>
-              ) : (
-                <div>Data loaded!</div>
-              )} */}
               {isSubmitting ? 'Signing Up...' : 'Sign Up'}
             </button>
 

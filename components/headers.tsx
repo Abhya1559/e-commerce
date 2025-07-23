@@ -3,22 +3,26 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Menu, X } from 'lucide-react';
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const cookie = document.cookie;
-    const hasToken = cookie.includes('token=');
+    const hasToken = cookie.includes('refreshToken');
     console.log('Cookie:', cookie, 'Has token:', hasToken);
-    setIsLoggedIn(hasToken);
+    setIsLoggedIn(true);
   }, []);
-  const handleLogout = () => {
-    document.cookie = 'token=; Max-Age=0;path=/';
+
+  const handleLogout = async () => {
+    await fetch('/api/auth/logout');
     setIsLoggedIn(false);
     router.push('/login');
   };
+
   return (
     <div className="top-0 fixed z-10 w-full bg-white shadow-md p-4 font-sans">
       <nav className="max-w-[1280px] mx-auto flex items-center justify-between">
@@ -29,7 +33,9 @@ export default function Header() {
             </h1>
           </Link>
         </div>
-        <div className="flex items-center justify-center gap-8 font-semibold">
+
+        {/* Desktop Nav */}
+        <div className="hidden md:flex items-center justify-center gap-8 font-semibold">
           <Link href="/" className="cursor-pointer hover:text-orange-500">
             Home
           </Link>
@@ -46,19 +52,16 @@ export default function Header() {
             Kids
           </Link>
         </div>
-        <div className="flex items-center justify-between font-semibold gap-4">
+
+        {/* Desktop Auth */}
+        <div className="hidden md:flex items-center justify-between font-semibold gap-4">
           {isLoggedIn ? (
-            <Link
-              href="/logout"
-              className="hover:underline hover:text-orange-500"
+            <Button
+              className="bg-orange-500 hover:bg-orange-700 cursor-pointer"
+              onClick={handleLogout}
             >
-              <Button
-                className="bg-orange-500 hover:bg-orange-700 cursor-pointer"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </Link>
+              Logout
+            </Button>
           ) : (
             <>
               <Link
@@ -75,7 +78,82 @@ export default function Header() {
             </>
           )}
         </div>
+
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden">
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden mt-4 px-4 space-y-3 font-semibold">
+          <Link
+            href="/"
+            className="block hover:text-orange-500"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Home
+          </Link>
+          <Link
+            href="/about"
+            className="block hover:text-orange-500"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            About
+          </Link>
+          <Link
+            href="/men"
+            className="block hover:text-orange-500"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Men
+          </Link>
+          <Link
+            href="/women"
+            className="block hover:text-orange-500"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Women
+          </Link>
+          <Link
+            href="/kids"
+            className="block hover:text-orange-500"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Kids
+          </Link>
+
+          {isLoggedIn ? (
+            <Button
+              className="w-full bg-orange-500 hover:bg-orange-700 mt-2"
+              onClick={() => {
+                handleLogout();
+                setMobileMenuOpen(false);
+              }}
+            >
+              Logout
+            </Button>
+          ) : (
+            <div className="space-y-2">
+              <Link
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block hover:text-orange-500"
+              >
+                Login
+              </Link>
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full bg-orange-500 hover:bg-orange-700">
+                  Sign Up
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
