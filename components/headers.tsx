@@ -5,21 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Header() {
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // const router = useRouter();
-
-  // useEffect(() => {
-  //   const cookie = document.cookie;
-  //   console.log(cookie);
-  //   const hasToken = cookie.includes('token=');
-  //   router.refresh();
-  //   setIsLoggedIn(true);
-  // }, []);
-  // const handleLogout = () => {
-  //   document.cookie = 'token=; Max-Age=0; path=/';
-  //   setIsLoggedIn(false);
-  //   router.push('/login');
-  // };
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
