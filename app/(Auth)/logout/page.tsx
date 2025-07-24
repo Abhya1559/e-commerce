@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 export default function Logout() {
   const router = useRouter();
+  const [status, setStatus] = useState<'loading' | 'done'>('loading');
 
   useEffect(() => {
     const logout = async () => {
@@ -25,6 +27,8 @@ export default function Logout() {
         console.error('Logout failed', err);
       }
 
+      setStatus('done');
+
       setTimeout(() => {
         router.push('/login');
       }, 1500);
@@ -34,11 +38,14 @@ export default function Logout() {
   }, [router]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen gap-4">
-      <h1 className="text-xl font-semibold text-orange-500">
-        Logging you out...
-      </h1>
-      <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-orange-500"></div>
-    </div>
+    <motion.div
+      className="h-screen flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <h2 className="text-2xl font-semibold text-gray-700">
+        {status === 'loading' ? 'Logging out...' : 'You have been logged out'}
+      </h2>
+    </motion.div>
   );
 }
