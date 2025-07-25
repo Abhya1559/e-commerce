@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import heroImage from '@/public/hero.jpg';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 
 export default function Hero() {
   return (
